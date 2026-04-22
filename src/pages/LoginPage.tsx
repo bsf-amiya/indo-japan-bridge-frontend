@@ -14,17 +14,17 @@ const LoginPage = () => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      const response = await fetch(
-        // "http://187.127.135.180:1818/api/user/user/login",
-        "http://localhost:1881/users/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username, password }),
-        }
-      );
+        const response = await fetch(
+          "http://187.127.135.180:1881/users/login",
+          // "http://localhost:1881/users/login",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+          }
+        );
 
       const data = await response.json();
 

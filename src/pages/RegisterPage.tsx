@@ -18,139 +18,243 @@ const RegisterPage = () => {
   const [step, setStep] = useState(0);
   const [selectedPersona, setSelectedPersona] = useState("");
   const [country, setCountry] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const [formData, setFormData] = useState({
+    firstname: "",
+    lastname: "",
+    username: "",
+    password: "",
+    phone1: "",
+    email: "",
+    country: "",
+    amount: "",
+    gstNo: "",
+    panNo: "",
+    cinNo: "",
+    corporateNo: "",
+    companyRegistrationNo: "",
+    taxId: "",
+    industryType: "",
+    website: ""
+  });
+
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+
+      const payload = {
+        ...formData,
+        amount: formData.amount ? parseInt(formData.amount) : null,
+        country: country,
+        userType: selectedPersona.toUpperCase()
+      };
+      console.log("Payload:", payload);//bsf: to be commented
+      // const response = await fetch("http://localhost:1881/users/add", {
+      const response = await fetch("http://187.127.135.180:1881/users/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!response.ok) throw new Error("Failed");
+
+      setStep(3);
+
+    } catch (error) {
+      console.log("On Error Payload:", payload);//bsf: needs to commented
+      console.error(error);
+      alert("Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="pt-24 pb-16 flex items-center justify-center min-h-screen">
         <div className="container mx-auto px-4 max-w-xl">
+
           {/* Progress */}
           <div className="flex items-center justify-center gap-2 mb-10">
             {[0, 1, 2, 3].map((s) => (
-              <div key={s} className={`h-1.5 rounded-full transition-all ${s <= step ? "bg-accent w-10" : "bg-border w-6"}`} />
+              <div key={s} className={`h-1.5 rounded-full ${s <= step ? "bg-accent w-10" : "bg-border w-6"}`} />
             ))}
           </div>
 
           <AnimatePresence mode="wait">
+
+            {/* STEP 0 */}
             {step === 0 && (
-              <motion.div key="step0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <h2 className="text-2xl font-heading font-bold text-foreground mb-2 text-center">Choose Your Role</h2>
-                <p className="text-muted-foreground text-center mb-8">Select the persona that best describes your business objective.</p>
+              <motion.div key="step0">
+                <h2 className="text-2xl text-center mb-6">Choose Your Role</h2>
                 <div className="grid grid-cols-2 gap-4">
                   {personas.map((p) => (
                     <button
                       key={p.key}
                       onClick={() => setSelectedPersona(p.key)}
-                      className={`border-2 rounded-xl p-5 text-center transition-all hover:shadow-card ${
-                        selectedPersona === p.key ? p.color : "border-border bg-card"
+                      className={`border-2 rounded-xl p-5 ${
+                        selectedPersona === p.key ? p.color : "border-border"
                       }`}
                     >
-                      <p.icon className={`h-8 w-8 mx-auto mb-3 ${selectedPersona === p.key ? "text-foreground" : "text-muted-foreground"}`} />
-                      <span className="font-medium text-sm text-card-foreground">{p.label}</span>
+                      <p.icon className="h-6 w-6 mx-auto mb-2" />
+                      {p.label}
                     </button>
                   ))}
                 </div>
-                <Button
-                  className="w-full mt-8 bg-accent text-accent-foreground hover:bg-saffron-light gap-2"
-                  disabled={!selectedPersona}
-                  onClick={() => setStep(1)}
-                >
-                  Continue <ArrowRight className="h-4 w-4" />
+
+                <Button disabled={!selectedPersona} className="w-full mt-6" onClick={() => setStep(1)}>
+                  Continue <ArrowRight />
                 </Button>
               </motion.div>
             )}
 
+            {/* STEP 1 */}
             {step === 1 && (
-              <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <h2 className="text-2xl font-heading font-bold text-foreground mb-2 text-center">Basic Information</h2>
-                <p className="text-muted-foreground text-center mb-8">Tell us about yourself and your organization.</p>
+              <motion.div key="step1">
+                <h2 className="text-2xl text-center mb-6">Basic Information</h2>
+
                 <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div><Label>First Name</Label><Input placeholder="Rajesh" /></div>
-                    <div><Label>Last Name</Label><Input placeholder="Tanaka" /></div>
-                  </div>
-                  <div><Label>Email</Label><Input type="email" placeholder="you@company.com" /></div>
-                  <div><Label>Organization</Label><Input placeholder="Company name" /></div>
-                  <div>
-                    <Label>Country</Label>
-                    <Select value={country} onValueChange={setCountry}>
-                      <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="india">🇮🇳 India</SelectItem>
-                        <SelectItem value="japan">🇯🇵 Japan</SelectItem>
-                        <SelectItem value="other">🌐 Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+
+                  <Input placeholder="First Name"
+                    value={formData.firstname}
+                    onChange={(e) => setFormData({ ...formData, firstname: e.target.value })} />
+
+                  <Input placeholder="Last Name"
+                    value={formData.lastname}
+                    onChange={(e) => setFormData({ ...formData, lastname: e.target.value })} />
+
+                  <Input placeholder="Username"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })} />
+
+                  <Input placeholder="Password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
+
+                  <Input placeholder="Phone"
+                    value={formData.phone1}
+                    onChange={(e) => setFormData({ ...formData, phone1: e.target.value })} />
+
+                  <Input placeholder="Email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+
+                  <Select value={country} onValueChange={setCountry}>
+                    <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="india">India</SelectItem>
+                      <SelectItem value="japan">Japan</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Input placeholder="Amount"
+                    value={formData.amount}
+                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })} />
+
                 </div>
-                <div className="flex gap-3 mt-8">
-                  <Button variant="outline" onClick={() => setStep(0)} className="gap-2"><ArrowLeft className="h-4 w-4" /> Back</Button>
-                  <Button className="flex-1 bg-accent text-accent-foreground hover:bg-saffron-light gap-2" onClick={() => setStep(2)}>
-                    Continue <ArrowRight className="h-4 w-4" />
-                  </Button>
+
+                <div className="flex gap-2 mt-6">
+                  <Button variant="outline" onClick={() => setStep(0)}>Back</Button>
+                  <Button onClick={() => setStep(2)}>Continue</Button>
                 </div>
               </motion.div>
             )}
 
+            {/* STEP 2 */}
             {step === 2 && (
-              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-                <h2 className="text-2xl font-heading font-bold text-foreground mb-2 text-center">Compliance Details</h2>
-                <p className="text-muted-foreground text-center mb-8">
-                  {country === "india" ? "Indian regulatory identifiers" : country === "japan" ? "Japanese corporate identifiers" : "Business identifiers"}
-                </p>
+              <motion.div key="step2">
+                <h2 className="text-2xl text-center mb-6">Compliance Details</h2>
+
                 <div className="space-y-4">
-                  {country === "india" ? (
+
+                  {country === "india" && (
                     <>
-                      <div><Label>GST Number</Label><Input placeholder="22AAAAA0000A1Z5" /></div>
-                      <div><Label>PAN Number</Label><Input placeholder="AAAAA0000A" /></div>
-                      <div><Label>CIN (if applicable)</Label><Input placeholder="U74999DL2020PTC123456" /></div>
-                    </>
-                  ) : country === "japan" ? (
-                    <>
-                      <div><Label>法人番号 (Corporate Number)</Label><Input placeholder="1234567890123" /></div>
-                      <div><Label>Company Registry</Label><Input placeholder="Registry reference" /></div>
-                    </>
-                  ) : (
-                    <>
-                      <div><Label>Business Registration Number</Label><Input placeholder="Enter registration number" /></div>
-                      <div><Label>Tax ID</Label><Input placeholder="Enter tax identifier" /></div>
+                      <Input placeholder="GST No"
+                        onChange={(e) => setFormData({ ...formData, gstNo: e.target.value })} />
+                      <Input placeholder="PAN No"
+                        onChange={(e) => setFormData({ ...formData, panNo: e.target.value })} />
+                      <Input placeholder="CIN No"
+                        onChange={(e) => setFormData({ ...formData, cinNo: e.target.value })} />
                     </>
                   )}
+
+                  {country === "japan" && (
+                    <>
+                      <Input placeholder="Corporate No"
+                        onChange={(e) => setFormData({ ...formData, corporateNo: e.target.value })} />
+                      <Input placeholder="Company Registration"
+                        onChange={(e) => setFormData({ ...formData, companyRegistrationNo: e.target.value })} />
+                    </>
+                  )}
+
+                  {country === "other" && (
+                    <>
+                      <Input placeholder="Business Registration"
+                        onChange={(e) => setFormData({ ...formData, companyRegistrationNo: e.target.value })} />
+                      <Input placeholder="Tax ID"
+                        onChange={(e) => setFormData({ ...formData, taxId: e.target.value })} />
+                    </>
+                  )}
+
+                  {/* <Input placeholder="Industry"
+                    onChange={(e) => setFormData({ ...formData, industryType: e.target.value })} /> */}
                   <div>
                     <Label>Industry</Label>
-                    <Select>
-                      <SelectTrigger><SelectValue placeholder="Select industry" /></SelectTrigger>
+                    <Select
+                      value={formData.industryType}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, industryType: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select industry" />
+                      </SelectTrigger>
+
                       <SelectContent>
-                        {["Technology", "Manufacturing", "Fintech", "Clean Energy", "Pharmaceuticals", "Automotive", "Other"].map((ind) => (
-                          <SelectItem key={ind} value={ind.toLowerCase()}>{ind}</SelectItem>
+                        {[
+                          "Technology",
+                          "Manufacturing",
+                          "Fintech",
+                          "Clean Energy",
+                          "Pharmaceuticals",
+                          "Automotive",
+                          "Other"
+                        ].map((ind) => (
+                          <SelectItem key={ind} value={ind}>
+                            {ind}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
+                  <Input placeholder="Website"
+                    onChange={(e) => setFormData({ ...formData, website: e.target.value })} />
+
                 </div>
-                <div className="flex gap-3 mt-8">
-                  <Button variant="outline" onClick={() => setStep(1)} className="gap-2"><ArrowLeft className="h-4 w-4" /> Back</Button>
-                  <Button className="flex-1 bg-accent text-accent-foreground hover:bg-saffron-light gap-2" onClick={() => setStep(3)}>
-                    Continue <ArrowRight className="h-4 w-4" />
+
+                <div className="flex gap-2 mt-6">
+                  <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
+                  <Button onClick={handleSubmit} disabled={loading}>
+                    {loading ? "Saving..." : "Continue"}
                   </Button>
                 </div>
               </motion.div>
             )}
 
+            {/* STEP 3 */}
             {step === 3 && (
-              <motion.div key="step3" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center">
-                <div className="w-16 h-16 rounded-full bg-jade/10 flex items-center justify-center mx-auto mb-6">
-                  <Check className="h-8 w-8 text-jade" />
-                </div>
-                <h2 className="text-2xl font-heading font-bold text-foreground mb-2">Registration Complete</h2>
-                <p className="text-muted-foreground mb-8">
-                  Your profile is under review. You'll receive verification within 24-48 hours.
-                </p>
-                <Button className="bg-accent text-accent-foreground hover:bg-saffron-light" onClick={() => window.location.href = "/deals"}>
-                  Explore Deals
-                </Button>
+              <motion.div key="step3" className="text-center">
+                <Check className="mx-auto mb-4" size={40} />
+                <h2 className="text-2xl">Registration Complete</h2>
+                <p>Your profile is under review.</p>
               </motion.div>
             )}
+
           </AnimatePresence>
         </div>
       </div>
